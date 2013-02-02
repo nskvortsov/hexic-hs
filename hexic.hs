@@ -40,16 +40,16 @@ evenElemsString (x:y:xs) = (replicate (length $ show x) ' ') ++ " " ++ show y ++
 -- Main game loop
 play :: Board -> Int -> StdGen -> IO ()
 play board score gen = 
-    let move = findMove board
-    in if isNothing move
-            then putStrLn $ "No more moves available. Final score: " ++ show score
-            else let nextBoard = makeMove move board
-                     (boardAfterShake, moveScore, newGen) = shakeAndScore gen nextBoard
-                 in  do  putStrLn $ "move " ++ (show $ fromJust move) ++ "\n"
-                         printBoard nextBoard
-                         putStrLn $ "shake/score: " ++ (show moveScore) ++ " total: " ++ (show (score + moveScore)) ++ "\n"
-                         printBoard boardAfterShake
-                         play boardAfterShake (score + moveScore) newGen 
+    let maybeMove = findMove board
+    in case maybeMove of
+        Nothing -> putStrLn $ "No more moves available. Final score: " ++ show score
+        Just move -> let nextBoard = makeMove move board
+                         (boardAfterShake, moveScore, newGen) = shakeAndScore gen nextBoard
+                     in  do  putStrLn $ "move " ++ (show move) ++ "\n"
+                             printBoard nextBoard
+                             putStrLn $ "shake/score: " ++ (show moveScore) ++ " total: " ++ (show (score + moveScore)) ++ "\n"
+                             printBoard boardAfterShake
+                             play boardAfterShake (score + moveScore) newGen
 
 type Move = (Coordinate, Coordinate, Coordinate)
 type CandidateMove = (Move, Int)
@@ -157,15 +157,14 @@ selectMoveFromCandidates [] = Nothing
 selectMoveFromCandidates candidates = Just $ fst $ foldl1 (\(m1, v1) (m2, v2) -> if (v1 < v2) then (m2, v2) else (m1, v1)) candidates
 
 -- Perform move on the board
-makeMove :: Maybe Move -> Board -> Board
-makeMove Nothing b = b
-makeMove (Just (c1,c2,c3)) b = let v1 = getVal b c1
-                                   v2 = getVal b c2
-                                   v3 = getVal b c3
-                                   b1 = setVal b c1 v3
-                                   b2 = setVal b1 c2 v1
-                                   b3 = setVal b2 c3 v2
-                                 in b3 
+makeMove :: Move -> Board -> Board
+makeMove (c1,c2,c3) b = let v1 = getVal b c1
+                            v2 = getVal b c2
+                            v3 = getVal b c3
+                            b1 = setVal b c1 v3
+                            b2 = setVal b1 c2 v1
+                            b3 = setVal b2 c3 v2
+                        in b3
 
 -- Shake board and compute score
 shakeAndScore :: StdGen -> Board -> (Board, Int, StdGen)
