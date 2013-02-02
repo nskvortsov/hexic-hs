@@ -111,8 +111,11 @@ joinHeadAndTail list = list
 findCompanion :: [Tile] -> [Maybe Tile] -> Maybe Tile
 findCompanion cluster@((c1, v1):xs) tiles = let 
                                              t = find (\tile@(c, v) -> (v == v1) && not (tile `elem` cluster)) $ catMaybes tiles
-                                            in if isNothing t then if length cluster > 2 then Just (head cluster) else Nothing
-                                             else t
+                                            in case t of
+                                               Just _ -> t
+                                               Nothing | length cluster > 2 -> Just (head cluster)
+                                               _ -> Nothing
+
 
 -- Try to Make a CandidateMove
 -- Cluster -> current location -> Companion for move -> Neighbourhood tiles
