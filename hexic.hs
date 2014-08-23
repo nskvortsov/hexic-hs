@@ -193,6 +193,7 @@ checkForDrop b c = let
                     $ filter (\((c,v):xs) -> v == snd me) adj
                                                      
 -- Count clusters and perfom drop of values
+-- TODO fix a bug: we should re-run findDrop after each dropCell
 doDrop :: [Drop] -> Board -> StdGen -> (Board, Int, StdGen)
 doDrop d b gen = let
                cleanedDrop = cleanUpDrop d
